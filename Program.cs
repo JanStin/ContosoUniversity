@@ -22,9 +22,7 @@ namespace ContosoUniversity
             host.Run();
         }
 
-        // Создаются БД на основе моделей, которые указаны в data/schoolContext. 
-        // Или удалет таблицы и создает заново, если модель данных измениться.
-        // Если БД существует, то ничего не происходит.
+        
         private static void CreateDbIfNotExists(IHost host)
         {
             using (var scope = host.Services.CreateScope())
@@ -34,7 +32,8 @@ namespace ContosoUniversity
                 try
                 {
                     var context = services.GetRequiredService<SchoolContext>();
-                    context.Database.EnsureCreated();
+                    //context.Database.EnsureCreated();
+                    DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {
