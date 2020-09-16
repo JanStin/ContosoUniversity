@@ -27,14 +27,22 @@ namespace ContosoUniversity.Pages.Students
 
         public IList<Student> Students { get; set; }
 
-        public async Task OnGetAsync(string sortOrder)
+        public async Task OnGetAsync(string sortOrder, string searchString)
         {
             NameSort = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             DateSort = sortOrder == "Date" ? "date_desc" : "Date";
             MidNameSort = sortOrder == "MidName" ? "midName_desc" : "MidName";
 
+            CurrentFilter = searchString;
+
             IQueryable <Student> studentsIQ = from s in _context.Students
                                              select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                studentsIQ = studentsIQ.Where(s => s.LastName.Contains(searchString)
+                                       || s.FirstMidName.Contains(searchString));
+            }
 
             switch (sortOrder)
             {
