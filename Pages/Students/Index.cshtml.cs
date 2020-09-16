@@ -19,11 +19,46 @@ namespace ContosoUniversity.Pages.Students
             _context = context;
         }
 
-        public IList<Student> Student { get;set; }
+        public string NameSort { get; set; }
+        public string DateSort { get; set; }
+        public string MidNameSort { get; set; }
+        public string CurrentFilter { get; set; }
+        public string CurrentSort { get; set; }
 
-        public async Task OnGetAsync()
+        public IList<Student> Students { get; set; }
+
+        public async Task OnGetAsync(string sortOrder)
         {
-            Student = await _context.Students.ToListAsync();
+            NameSort = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            DateSort = sortOrder == "Date" ? "date_desc" : "Date";
+            MidNameSort = sortOrder == "MidName" ? "midName_desc" : "MidName";
+
+            IQueryable <Student> studentsIQ = from s in _context.Students
+                                             select s;
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    studentsIQ = studentsIQ.OrderByDescending(s => s.LastName);
+                    break;
+                case "Date":
+                    studentsIQ = studentsIQ.OrderBy(s => s.EnrollmentDate);
+                    break;
+                case "date_desc":
+                    studentsIQ = studentsIQ.OrderByDescending(s => s.EnrollmentDate);
+                    break;
+                case "MidName":
+                    studentsIQ = studentsIQ.OrderBy(s => s.FirstMidName);
+                    break;
+                case "midName_desc":
+                    studentsIQ = studentsIQ.OrderByDescending(s => s.FirstMidName);
+                    break;
+                default:
+                    studentsIQ = studentsIQ.OrderBy(s => s.LastName);
+                    break;
+            }
+
+            Students = await studentsIQ.AsNoTracking().ToListAsync();
         }
     }
 }
