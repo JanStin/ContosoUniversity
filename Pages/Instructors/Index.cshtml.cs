@@ -33,11 +33,11 @@ namespace ContosoUniversity.Pages.Instructors
                 .Include(i => i.CourseAssignments)
                     .ThenInclude(i => i.Course)
                         .ThenInclude(i => i.Department)
-                .Include(i => i.CourseAssignments)
-                    .ThenInclude(i => i.Course)
-                        .ThenInclude(i => i.Enrollments)
-                            .ThenInclude(i => i.Student)
-                .AsNoTracking()
+                //.Include(i => i.CourseAssignments)
+                //    .ThenInclude(i => i.Course)
+                //        .ThenInclude(i => i.Enrollments)
+                //            .ThenInclude(i => i.Student)
+                //.AsNoTracking()
                 .OrderBy(i => i.LastName)
                 .ToListAsync()
             };
@@ -53,12 +53,14 @@ namespace ContosoUniversity.Pages.Instructors
             if (courseID != null)
             {
                 CourseID = courseID.Value;
-
-                //var selectedCourse = InstructorData.Courses
-                //    .Where(x => x.CourseID == courseID).Single();
-                //InstructorData.Enrollments = selectedCourse.Enrollments;
-                InstructorData.Enrollments = InstructorData.Courses.Single(
-                    x => x.CourseID == courseID).Enrollments;
+                var selectedCourse = InstructorData.Courses
+                    .Where(x => x.CourseID == courseID).Single();
+                await _context.Entry(selectedCourse).Collection(x => x.Enrollments).LoadAsync();
+                foreach (Enrollment enrollment in selectedCourse.Enrollments)
+                {
+                    await _context.Entry(enrollment).Reference(x => x.Student).LoadAsync();
+                }
+                InstructorData.Enrollments = selectedCourse.Enrollments;
             }
         }
     }
